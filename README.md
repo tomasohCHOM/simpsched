@@ -1,4 +1,4 @@
-# oss_stats
+# simpsched
 
 `simpsched` is a Python CLI tool to easily create and manage daily tasks.
 
