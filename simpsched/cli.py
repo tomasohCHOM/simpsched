@@ -97,14 +97,6 @@ def ls() -> None:
     list_tasks()
 
 
-def list_tasks():
-    """List all tasks"""
-    db = DatabaseHandler()
-    tasks = db.list_tasks()
-    db.close()
-    display_tasks_table(tasks)
-
-
 # ---------------------------
 # Interactive wrappers
 # ---------------------------
@@ -129,6 +121,14 @@ def interactive_update() -> None:
     ).ask()
     due = questionary.text("Enter new due date (optional):").ask()
     update.callback(task_id, status or None, due or None)
+
+
+def list_tasks():
+    """List all tasks"""
+    db = DatabaseHandler()
+    tasks = db.list_tasks()
+    db.close()
+    display_tasks_table(tasks)
 
 
 if __name__ == "__main__":

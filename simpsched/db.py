@@ -1,5 +1,6 @@
 import sqlite3
-from typing import List, Optional, Tuple
+from typing import List, Optional
+from .model import Task
 
 
 class DatabaseHandler:
@@ -55,12 +56,13 @@ class DatabaseHandler:
         self.cur.execute("UPDATE tasks SET due_at = ? WHERE id = ?", (due_at, task_id))
         self.conn.commit()
 
-    def list_tasks(self) -> List[Tuple[int, str, str, str, str, Optional[str]]]:
-        """Return (id, title, description, status, created_at, due_at) of each task in the db."""
+    def list_tasks(self) -> List[Task]:
+        """Return list of Task objects from the db."""
         self.cur.execute(
             "SELECT id, title, description, status, created_at, due_at FROM tasks"
         )
-        return self.cur.fetchall()
+        rows = self.cur.fetchall()
+        return [Task(*row) for row in rows]
 
     def close(self) -> None:
         self.conn.close()

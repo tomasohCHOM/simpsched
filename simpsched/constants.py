@@ -14,3 +14,11 @@ class Status(Enum):
     DONE = "done"
     IN_PROGRESS = "in_progress"
     PENDING = "pending"
+
+
+STATUS_COLORS = {
+    Status.CANCELLED.value: "red",
+    Status.DONE.value: "green",
+    Status.IN_PROGRESS.value: "yellow",
+    Status.PENDING.value: "dim",
+}

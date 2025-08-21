@@ -1,19 +1,37 @@
 from rich.table import Table
+from rich import box
+from typing import List
+from .constants import STATUS_COLORS
+from .db import Task
 from .utils import console
 
 
-def display_tasks_table(tasks) -> None:
+def display_tasks_table(tasks: List[Task]) -> None:
     if not tasks:
+        console.print("No tasks to show.")
         return
 
-    table = Table(show_header=True, header_style="bold cyan")
-    table.add_column("ID", style="dim", width=4)
+    table = Table(
+        title="Tasks",
+        show_header=True,
+        header_style="bold cyan",
+        box=box.SQUARE,
+        show_lines=True,
+    )
+    table.add_column("ID", style="dim")
     table.add_column("Title", style="bold")
     table.add_column("Description", style="italic")
-    table.add_column("Status", style="green")
-    table.add_column("Due", style="yellow")
+    table.add_column("Status")
+    table.add_column("Due")
 
-    for t in tasks:
-        table.add_row(str(t[0]), t[1], t[2] or "", t[3], t[5] or "—")
+    for task in tasks:
+        status_color = STATUS_COLORS.get(task.status, "white")
+        table.add_row(
+            str(task.id),
+            task.title,
+            task.description or "",
+            f"[{status_color}]{task.status}[/{status_color}]",
+            task.due_at or "—",
+        )
 
     console.print(table)
