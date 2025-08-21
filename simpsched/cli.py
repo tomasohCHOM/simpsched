@@ -1,8 +1,10 @@
 import click
+import questionary
 from typing import Optional
-from rich.console import Console
-from .constants import Status
+from .constants import Action, Status
 from .db import DatabaseHandler
+from .utils import console
+from .view import display_tasks_table
 
 
 LOGO = """
@@ -14,13 +16,43 @@ LOGO = """
                 |_|
 """
 
-console = Console()
 
-
-@click.group()
-def cli() -> None:
+@click.group(invoke_without_command=True)
+@click.pass_context
+def cli(ctx: click.Context) -> None:
     """Task manager CLI"""
     console.print(LOGO, style="#9bcffa", highlight=False)
+    if ctx.invoked_subcommand is None:
+        console.print(
+            "Welcome to interactive mode. Choose any of the options to continue:\n"
+        )
+        interactive_loop()
+
+
+def interactive_loop() -> None:
+    while True:
+        action = questionary.select(
+            "Select one of the following actions", choices=[e.value for e in Action]
+        ).ask()
+        if not action:
+            break
+
+        match action:
+            case Action.ADD.value:
+                interactive_add()
+            case Action.REMOVE.value:
+                interactive_rm()
+            case Action.UPDATE.value:
+                interactive_update()
+            case Action.LIST.value:
+                list_tasks()
+            case Action.EXIT.value:
+                break
+
+
+# ---------------------------
+# Non-interactive commands
+# ---------------------------
 
 
 @cli.command()
@@ -32,7 +64,7 @@ def add(title: str, desc: str, due: str) -> None:
     db = DatabaseHandler()
     db.add_task(title, desc, due)
     db.close()
-    print(f"Task added: {title}")
+    click.echo(f"Task added: {title}")
 
 
 @cli.command()
@@ -42,7 +74,7 @@ def rm(task_id: int) -> None:
     db = DatabaseHandler()
     db.remove_task(task_id)
     db.close()
-    print(f"Task removed with id: {task_id}")
+    click.echo(f"Task removed with id: {task_id}")
 
 
 @cli.command()
@@ -50,27 +82,53 @@ def rm(task_id: int) -> None:
 @click.option("--status", "-s", type=click.Choice([e.value for e in Status]))
 @click.option("--due", default=None, help="Due date (YYYY-MM-DD HH:MM:SS)", type=str)
 def update(task_id: int, status: Optional[str], due: Optional[str]):
-    """Update the status of a task with its id"""
+    """Update the status or due date of a task"""
     db = DatabaseHandler()
     if due:
         db.update_due_at(task_id, due)
     if status:
         db.update_status(task_id, status)
     db.close()
-    print(f"Updated status of task with id {task_id}")
+    click.echo(f"Updated task with id {task_id}")
 
 
 @cli.command()
 def ls() -> None:
+    list_tasks()
+
+
+def list_tasks():
     """List all tasks"""
     db = DatabaseHandler()
     tasks = db.list_tasks()
     db.close()
-    if not tasks:
-        click.echo("No tasks found")
-        return
-    for t in tasks:
-        click.echo(f"[{t[0]}] {t[1]} ({t[3]}) - due {t[5]}")
+    display_tasks_table(tasks)
+
+
+# ---------------------------
+# Interactive wrappers
+# ---------------------------
+
+
+def interactive_add() -> None:
+    title = questionary.text("Enter task title:").ask()
+    desc = questionary.text("Enter description (optional):").ask()
+    due = questionary.text("Enter due date (YYYY-MM-DD HH:MM:SS) (optional):").ask()
+    add.callback(title, desc or "", due or None)
+
+
+def interactive_rm() -> None:
+    task_id = questionary.text("Enter task id to remove:").ask()
+    rm.callback(int(task_id))
+
+
+def interactive_update() -> None:
+    task_id = int(questionary.text("Enter task id to update:").ask())
+    status = questionary.select(
+        "Select new status", choices=[e.value for e in Status]
+    ).ask()
+    due = questionary.text("Enter new due date (optional):").ask()
+    update.callback(task_id, status or None, due or None)
 
 
 if __name__ == "__main__":
