@@ -1,7 +1,6 @@
 from .constants import Status
 from .validations import TitleNotEmptyValidator
 
-
 task_prompts = {
     "title": {
         "name": "title",
@@ -12,18 +11,18 @@ task_prompts = {
     "desc": {
         "name": "desc",
         "qtype": "text",
-        "prompt": "Enter task desc (optional):",
-    },
-    "due_at": {
-        "name": "due_at",
-        "qtype": "text",
-        "prompt": "Enter due date (YYYY-MM-DD HH:MM:SS) (optional):",
+        "prompt": "Enter task description (optional):",
     },
     "status": {
         "name": "status",
         "qtype": "select",
         "prompt": "Select task status:",
         "kwargs": {"choices": [s.value for s in Status]},
+    },
+    "due_at": {
+        "name": "due_at",
+        "qtype": "text",
+        "prompt": "Enter due date (YYYY-MM-DD HH:MM:SS - time is optional) (optional):",
     },
     "task_id": {
         "name": "task_id",
@@ -49,8 +48,8 @@ steps = {
     "add": [
         task_prompts["title"],
         task_prompts["desc"],
+        # task_prompts["status"],
         task_prompts["due_at"],
-        task_prompts["status"],
     ],
     "rm": [task_prompts["task_id"], task_prompts["confirm"]],
     "update": [

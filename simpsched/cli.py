@@ -1,6 +1,6 @@
 import click
 import questionary
-from .constants import Action
+from .constants import Action, Status, FLAGS, HELP
 from .db import DatabaseHandler
 from .steps import task_prompts, steps
 from .utils import run_interactive_steps
@@ -46,34 +46,47 @@ def interactive_loop() -> None:
 
 
 @cli.command()
-@click.option("--title", "-t", help="Task name", type=str, required=True)
-@click.option("--desc", "-d", default="", help="Task description", type=str)
-@click.option("--due_at", default=None, help="Due date (YYYY-MM-DD HH:MM:SS)", type=str)
-def add(title: str, desc: str, due_at: str) -> None:
+@click.option(FLAGS["title"], help=HELP["title"], required=True)
+@click.option(FLAGS["desc"], help=HELP["desc"], default="")
+@click.option(
+    FLAGS["status"],
+    type=click.Choice([s.value for s in Status]),
+    default=Status.PENDING.value,
+    help=HELP["status"],
+)
+@click.option(FLAGS["due_at"], help=HELP["due_at"], default=None)
+def add(title: str, desc: str, status=Status.PENDING.value, due_at=None) -> None:
     """Add a new task"""
     db = DatabaseHandler()
-    db.add_task(title, desc, due_at)
+    db.add_task(title, desc, status, due_at)
     db.close()
     display_task_message(f"Task added: {title}")
+    list_tasks()
 
 
 @cli.command()
-@click.option("--task_id", "-id", type=int, required=True)
-def rm(task_id: int) -> None:
+@click.option(FLAGS["id"], help=HELP["id"], required=True)
+def rm(id: int) -> None:
     """Remove a task given its id"""
     db = DatabaseHandler()
-    db.remove_task(task_id)
+    db.remove_task(id)
     db.close()
-    display_task_message(f"Task removed with id: {task_id}")
+    display_task_message(f"Task removed with id: {id}")
+    list_tasks()
 
 
-@click.command()
-@click.option("--task_id", type=int, required=True)
-@click.option("--title", type=str, help="New title for the task")
-@click.option("--desc", type=str, help="New desc")
-@click.option("--status", type=str, help="New status")
-@click.option("--due_at", type=str, help="New due date (YYYY-MM-DD HH:MM:SS)")
-def update(task_id, title, desc=None, status=None, due_at=None):
+@cli.command()
+@click.option(FLAGS["id"], help=HELP["id"], required=True)
+@click.option(FLAGS["title"], help=HELP["title"])
+@click.option(FLAGS["desc"], help=HELP["desc"])
+@click.option(
+    FLAGS["status"],
+    type=click.Choice([s.value for s in Status]),
+    default=Status.PENDING.value,
+    help=HELP["status"],
+)
+@click.option(FLAGS["due_at"], help=HELP["due_at"])
+def update(id, title, desc=None, status=None, due_at=None):
     """Update a task given its id"""
     updates = {
         k: v
@@ -87,14 +100,16 @@ def update(task_id, title, desc=None, status=None, due_at=None):
     }
 
     db = DatabaseHandler()
-    db.update_task(task_id, **updates)
+    db.update_task(id, **updates)
     db.close()
 
-    display_task_message(f"Updated task with id: {task_id}")
+    display_task_message(f"Updated task with id: {id}")
+    list_tasks()
 
 
 @cli.command()
 def ls() -> None:
+    """List all available tasks"""
     list_tasks()
 
 
@@ -131,8 +146,7 @@ def interactive_update() -> None:
     update.callback(task_id, **answers)
 
 
-def list_tasks():
-    """List all tasks"""
+def list_tasks() -> None:
     db = DatabaseHandler()
     tasks = db.list_tasks()
     db.close()

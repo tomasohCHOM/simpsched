@@ -23,9 +23,18 @@ STATUS_COLORS = {
     Status.PENDING.value: "dim",
 }
 
-USER_PROMPTS = {
-    "title": "Enter task title",
-    "desc": "Enter desc (optional):",
-    "due_at": "Enter due date (YYYY-MM-DD HH:MM:SS) (optional):",
-    "status": "Select the status of your task:",
+FLAGS = {
+    "id": "--id",
+    "title": "--title",
+    "desc": "--desc",
+    "due_at": "--due_at",
+    "status": "--status",
+}
+
+HELP = {
+    "id": "Task ID",
+    "title": "Task title",
+    "desc": "Task description",
+    "due_at": "Due date (YYYY-MM-DD HH:MM:SS - time is optional)",
+    "status": "Status of the task",
 }

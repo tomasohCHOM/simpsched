@@ -1,6 +1,17 @@
 import sqlite3
+from dataclasses import dataclass
 from typing import List, Optional
-from .model import Task
+from .constants import Status
+
+
+@dataclass
+class Task:
+    id: int
+    title: str
+    desc: str
+    status: str
+    created_at: str
+    due_at: Optional[str]
 
 
 class DatabaseHandler:
@@ -32,15 +43,17 @@ class DatabaseHandler:
         self.conn.commit()
 
     def get_task(self, task_id: int) -> Optional[int]:
-        """Gets the task by its corresponding `task_id`"""
+        """Gets the task by its corresponding `task_id`."""
         self.cur.execute("SELECT id FROM tasks WHERE id = ?", (task_id,))
         return self.cur.fetchone()
 
-    def add_task(self, title: str, desc: str, due_at: Optional[str] = None) -> None:
+    def add_task(
+        self, title: str, desc: str, status: Status, due_at: Optional[str]
+    ) -> None:
         """Insert a new task. `due_at` should be ISO string (YYYY-MM-DD HH:MM:SS) or None."""
         self.cur.execute(
-            "INSERT INTO tasks (title, desc, due_at) VALUES (?, ?, ?)",
-            (title, desc, due_at),
+            "INSERT INTO tasks (title, desc, status, due_at) VALUES (?, ?, ?, ?)",
+            (title, desc, status, due_at),
         )
         self.conn.commit()
 
