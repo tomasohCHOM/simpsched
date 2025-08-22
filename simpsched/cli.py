@@ -1,9 +1,8 @@
 import click
 import questionary
-from typing import Optional
-from .constants import Action, Status, USER_PROMPTS
+from .constants import Action
 from .db import DatabaseHandler
-from .steps import steps
+from .steps import task_prompts, steps
 from .utils import run_interactive_steps
 from .view import display_logo, display_tasks_table, display_task_message
 
@@ -49,11 +48,11 @@ def interactive_loop() -> None:
 @cli.command()
 @click.option("--title", "-t", help="Task name", type=str, required=True)
 @click.option("--desc", "-d", default="", help="Task description", type=str)
-@click.option("--due", default=None, help="Due date (YYYY-MM-DD HH:MM:SS)", type=str)
-def add(title: str, desc: str, due: str) -> None:
+@click.option("--due_at", default=None, help="Due date (YYYY-MM-DD HH:MM:SS)", type=str)
+def add(title: str, desc: str, due_at: str) -> None:
     """Add a new task"""
     db = DatabaseHandler()
-    db.add_task(title, desc, due)
+    db.add_task(title, desc, due_at)
     db.close()
     display_task_message(f"Task added: {title}")
 
@@ -71,20 +70,21 @@ def rm(task_id: int) -> None:
 @click.command()
 @click.option("--task_id", type=int, required=True)
 @click.option("--title", type=str, help="New title for the task")
-@click.option("--description", type=str, help="New description")
+@click.option("--desc", type=str, help="New desc")
 @click.option("--status", type=str, help="New status")
 @click.option("--due_at", type=str, help="New due date (YYYY-MM-DD HH:MM:SS)")
-def update(task_id, title, description=None, status=None, due_at=None):
+def update(task_id, title, desc=None, status=None, due_at=None):
     """Update a task given its id"""
-    updates = {}
-    if title is not None:
-        updates["title"] = title
-    if description is not None:
-        updates["description"] = description
-    if status is not None:
-        updates["status"] = status
-    if due_at is not None:
-        updates["due_at"] = due_at
+    updates = {
+        k: v
+        for k, v in {
+            "title": title,
+            "desc": desc,
+            "status": status,
+            "due_at": due_at,
+        }.items()
+        if v is not None
+    }
 
     db = DatabaseHandler()
     db.update_task(task_id, **updates)
@@ -105,41 +105,30 @@ def ls() -> None:
 
 def interactive_add() -> None:
     answers = run_interactive_steps(steps["add"])
-    if answers is None or not answers["confirm"]:
+    if answers is None:
         return
-    add.callback(answers["title"], answers["desc"], answers["due"] or None)
+    add.callback(answers["title"], answers["desc"], answers["due_at"] or None)
 
 
 def interactive_rm() -> None:
     answers = run_interactive_steps(steps["rm"])
     if answers is None or not answers["confirm"]:
         return
-
     rm.callback(int(answers["task_id"]))
 
 
 def interactive_update() -> None:
-    task_id = questionary.text("Enter task ID to update:").ask()
-    if task_id is None:
+    base_answers = run_interactive_steps(steps["update"])
+    if not base_answers or not base_answers["fields"]:
         return
-
-    chosen = run_interactive_steps(steps["update"])
-    if chosen is None:
+    task_id = base_answers["task_id"]
+    selected_fields = base_answers["fields"]
+    # Filter prompts based on the chosen fields to update
+    prompts = [task_prompts[name] for name in selected_fields]
+    answers = run_interactive_steps(prompts)
+    if not answers:
         return
-
-    fields = chosen["fields"]
-    if not fields:
-        display_task_message("No fields selected.")
-        return
-
-    updates = {}
-    for field in fields:
-        answer = run_interactive_steps(steps["update_fields"][field])
-        if not answer:
-            return
-        updates.update(answer)
-
-    update.callback(task_id, **updates)
+    update.callback(task_id, **answers)
 
 
 def list_tasks():

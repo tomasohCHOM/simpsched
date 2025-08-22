@@ -22,7 +22,7 @@ class DatabaseHandler:
             CREATE TABLE IF NOT EXISTS tasks (
                 id          INTEGER PRIMARY KEY AUTOINCREMENT,
                 title       TEXT NOT NULL,
-                description TEXT,
+                desc TEXT,
                 status      TEXT DEFAULT 'pending',
                 created_at  TEXT DEFAULT CURRENT_TIMESTAMP,
                 due_at      TEXT
@@ -36,13 +36,11 @@ class DatabaseHandler:
         self.cur.execute("SELECT id FROM tasks WHERE id = ?", (task_id,))
         return self.cur.fetchone()
 
-    def add_task(
-        self, title: str, description: str, due_at: Optional[str] = None
-    ) -> None:
+    def add_task(self, title: str, desc: str, due_at: Optional[str] = None) -> None:
         """Insert a new task. `due_at` should be ISO string (YYYY-MM-DD HH:MM:SS) or None."""
         self.cur.execute(
-            "INSERT INTO tasks (title, description, due_at) VALUES (?, ?, ?)",
-            (title, description, due_at),
+            "INSERT INTO tasks (title, desc, due_at) VALUES (?, ?, ?)",
+            (title, desc, due_at),
         )
         self.conn.commit()
 
@@ -63,7 +61,7 @@ class DatabaseHandler:
     def list_tasks(self) -> List[Task]:
         """Return list of Task objects from the db."""
         self.cur.execute(
-            "SELECT id, title, description, status, created_at, due_at FROM tasks"
+            "SELECT id, title, desc, status, created_at, due_at FROM tasks"
         )
         rows = self.cur.fetchall()
         return [Task(*row) for row in rows]

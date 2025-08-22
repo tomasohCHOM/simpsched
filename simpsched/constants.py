@@ -10,10 +10,10 @@ class Action(Enum):
 
 
 class Status(Enum):
-    CANCELLED = "cancelled"
-    DONE = "done"
     IN_PROGRESS = "in_progress"
     PENDING = "pending"
+    DONE = "done"
+    CANCELLED = "cancelled"
 
 
 STATUS_COLORS = {
@@ -24,9 +24,8 @@ STATUS_COLORS = {
 }
 
 USER_PROMPTS = {
-    "add": {
-        "title": "Enter task title",
-        "description": "Enter description (optional):",
-        "due_at": "Enter due date (YYYY-MM-DD HH:MM:SS) (optional):",
-    }
+    "title": "Enter task title",
+    "desc": "Enter desc (optional):",
+    "due_at": "Enter due date (YYYY-MM-DD HH:MM:SS) (optional):",
+    "status": "Select the status of your task:",
 }

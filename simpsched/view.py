@@ -39,7 +39,7 @@ def display_tasks_table(tasks: List[Task]) -> None:
         table.add_row(
             str(task.id),
             task.title,
-            task.description or "",
+            task.desc or "-",
             f"[{status_color}]{task.status}[/{status_color}]",
             task.due_at or "—",
         )

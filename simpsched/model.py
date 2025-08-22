@@ -6,7 +6,7 @@ from typing import Optional
 class Task:
     id: int
     title: str
-    description: str
+    desc: str
     status: str
     created_at: str
     due_at: Optional[str]
