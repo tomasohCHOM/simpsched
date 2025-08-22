@@ -31,6 +31,11 @@ class DatabaseHandler:
         )
         self.conn.commit()
 
+    def get_task(self, task_id: int) -> Optional[int]:
+        """Gets the task by its corresponding `task_id`"""
+        self.cur.execute("SELECT id FROM tasks WHERE id = ?", (task_id,))
+        return self.cur.fetchone()
+
     def add_task(
         self, title: str, description: str, due_at: Optional[str] = None
     ) -> None:
@@ -46,14 +51,13 @@ class DatabaseHandler:
         self.cur.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
         self.conn.commit()
 
-    def update_status(self, task_id: int, status: str) -> None:
-        """Update the status of a task with its corresponding `task_id`."""
-        self.cur.execute("UPDATE tasks SET status = ? WHERE id = ?", (status, task_id))
-        self.conn.commit()
-
-    def update_due_at(self, task_id: int, due_at: str) -> None:
-        """Update due date. `due_at` should be in ISO string (YYYY-MM-DD HH:MM:SS) format."""
-        self.cur.execute("UPDATE tasks SET due_at = ? WHERE id = ?", (due_at, task_id))
+    def update_task(self, task_id: int, **updates) -> None:
+        """Updates a task with its `task_id` based on the provided fields."""
+        if not updates:
+            return
+        set_clause = ", ".join(f"{key} = ?" for key in updates.keys())
+        values = list(updates.values()) + [task_id]
+        self.cur.execute(f"UPDATE tasks SET {set_clause} WHERE id = ?", values)
         self.conn.commit()
 
     def list_tasks(self) -> List[Task]:

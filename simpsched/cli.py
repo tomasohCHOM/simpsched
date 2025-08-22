@@ -1,8 +1,10 @@
 import click
 import questionary
 from typing import Optional
-from .constants import Action, Status
+from .constants import Action, Status, USER_PROMPTS
 from .db import DatabaseHandler
+from .steps import steps
+from .utils import run_interactive_steps
 from .view import display_logo, display_tasks_table, display_task_message
 
 
@@ -21,7 +23,7 @@ def cli(ctx: click.Context) -> None:
 def interactive_loop() -> None:
     while True:
         action = questionary.select(
-            "Select one of the following actions", choices=[e.value for e in Action]
+            "Select one of the following actions", choices=[a.value for a in Action]
         ).ask()
         if not action:
             break
@@ -66,19 +68,29 @@ def rm(task_id: int) -> None:
     display_task_message(f"Task removed with id: {task_id}")
 
 
-@cli.command()
-@click.option("--task_id", "-id", type=int, required=True)
-@click.option("--status", "-s", type=click.Choice([e.value for e in Status]))
-@click.option("--due", default=None, help="Due date (YYYY-MM-DD HH:MM:SS)", type=str)
-def update(task_id: int, status: Optional[str], due: Optional[str]):
-    """Update the status or due date of a task"""
+@click.command()
+@click.option("--task_id", type=int, required=True)
+@click.option("--title", type=str, help="New title for the task")
+@click.option("--description", type=str, help="New description")
+@click.option("--status", type=str, help="New status")
+@click.option("--due_at", type=str, help="New due date (YYYY-MM-DD HH:MM:SS)")
+def update(task_id, title, description=None, status=None, due_at=None):
+    """Update a task given its id"""
+    updates = {}
+    if title is not None:
+        updates["title"] = title
+    if description is not None:
+        updates["description"] = description
+    if status is not None:
+        updates["status"] = status
+    if due_at is not None:
+        updates["due_at"] = due_at
+
     db = DatabaseHandler()
-    if due:
-        db.update_due_at(task_id, due)
-    if status:
-        db.update_status(task_id, status)
+    db.update_task(task_id, **updates)
     db.close()
-    display_task_message(f"Updated task with id {task_id}")
+
+    display_task_message(f"Updated task with id: {task_id}")
 
 
 @cli.command()
@@ -87,29 +99,47 @@ def ls() -> None:
 
 
 # ---------------------------
-# Interactive wrappers
+# Interactive commands
 # ---------------------------
 
 
 def interactive_add() -> None:
-    title = questionary.text("Enter task title:").ask()
-    desc = questionary.text("Enter description (optional):").ask()
-    due = questionary.text("Enter due date (YYYY-MM-DD HH:MM:SS) (optional):").ask()
-    add.callback(title, desc or "", due or None)
+    answers = run_interactive_steps(steps["add"])
+    if answers is None or not answers["confirm"]:
+        return
+    add.callback(answers["title"], answers["desc"], answers["due"] or None)
 
 
 def interactive_rm() -> None:
-    task_id = questionary.text("Enter task id to remove:").ask()
-    rm.callback(int(task_id))
+    answers = run_interactive_steps(steps["rm"])
+    if answers is None or not answers["confirm"]:
+        return
+
+    rm.callback(int(answers["task_id"]))
 
 
 def interactive_update() -> None:
-    task_id = int(questionary.text("Enter task id to update:").ask())
-    status = questionary.select(
-        "Select new status", choices=[e.value for e in Status]
-    ).ask()
-    due = questionary.text("Enter new due date (optional):").ask()
-    update.callback(task_id, status or None, due or None)
+    task_id = questionary.text("Enter task ID to update:").ask()
+    if task_id is None:
+        return
+
+    chosen = run_interactive_steps(steps["update"])
+    if chosen is None:
+        return
+
+    fields = chosen["fields"]
+    if not fields:
+        display_task_message("No fields selected.")
+        return
+
+    updates = {}
+    for field in fields:
+        answer = run_interactive_steps(steps["update_fields"][field])
+        if not answer:
+            return
+        updates.update(answer)
+
+    update.callback(task_id, **updates)
 
 
 def list_tasks():

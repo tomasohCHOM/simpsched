@@ -22,3 +22,11 @@ STATUS_COLORS = {
     Status.IN_PROGRESS.value: "yellow",
     Status.PENDING.value: "dim",
 }
+
+USER_PROMPTS = {
+    "add": {
+        "title": "Enter task title",
+        "description": "Enter description (optional):",
+        "due_at": "Enter due date (YYYY-MM-DD HH:MM:SS) (optional):",
+    }
+}

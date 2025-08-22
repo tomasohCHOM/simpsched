@@ -44,7 +44,9 @@ def display_tasks_table(tasks: List[Task]) -> None:
             task.due_at or "—",
         )
 
+    console.print()
     console.print(table)
+    console.print()
 
 
 def display_logo():
@@ -52,4 +54,4 @@ def display_logo():
 
 
 def display_task_message(message: str):
-    console.print(message, style="italic")
+    console.print(f"\n{message}\n", style="italic")
