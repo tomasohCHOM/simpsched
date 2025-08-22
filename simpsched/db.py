@@ -1,7 +1,6 @@
 import sqlite3
 from dataclasses import dataclass
 from typing import List, Optional
-from .constants import Status
 
 
 @dataclass
@@ -48,7 +47,7 @@ class DatabaseHandler:
         return self.cur.fetchone()
 
     def add_task(
-        self, title: str, desc: str, status: Status, due_at: Optional[str]
+        self, title: str, desc: str, status: str, due_at: Optional[str]
     ) -> None:
         """Insert a new task. `due_at` should be ISO string (YYYY-MM-DD HH:MM:SS) or None."""
         self.cur.execute(

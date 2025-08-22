@@ -48,7 +48,7 @@ steps = {
     "add": [
         task_prompts["title"],
         task_prompts["desc"],
-        # task_prompts["status"],
+        task_prompts["status"],
         task_prompts["due_at"],
     ],
     "rm": [task_prompts["task_id"], task_prompts["confirm"]],

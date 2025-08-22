@@ -1,5 +1,6 @@
 import click
 import questionary
+from typing import Optional
 from .constants import Action, Status, FLAGS, HELP
 from .db import DatabaseHandler
 from .steps import task_prompts, steps
@@ -50,12 +51,17 @@ def interactive_loop() -> None:
 @click.option(FLAGS["desc"], help=HELP["desc"], default="")
 @click.option(
     FLAGS["status"],
+    help=HELP["status"],
     type=click.Choice([s.value for s in Status]),
     default=Status.PENDING.value,
-    help=HELP["status"],
 )
 @click.option(FLAGS["due_at"], help=HELP["due_at"], default=None)
-def add(title: str, desc: str, status=Status.PENDING.value, due_at=None) -> None:
+def add(
+    title: str,
+    desc: str,
+    status: str,
+    due_at: Optional[str] = None,
+) -> None:
     """Add a new task"""
     db = DatabaseHandler()
     db.add_task(title, desc, status, due_at)
@@ -65,7 +71,7 @@ def add(title: str, desc: str, status=Status.PENDING.value, due_at=None) -> None
 
 
 @cli.command()
-@click.option(FLAGS["id"], help=HELP["id"], required=True)
+@click.option(FLAGS["id"], help=HELP["id"], type=int, required=True)
 def rm(id: int) -> None:
     """Remove a task given its id"""
     db = DatabaseHandler()
@@ -76,7 +82,7 @@ def rm(id: int) -> None:
 
 
 @cli.command()
-@click.option(FLAGS["id"], help=HELP["id"], required=True)
+@click.option(FLAGS["id"], help=HELP["id"], type=int, required=True)
 @click.option(FLAGS["title"], help=HELP["title"])
 @click.option(FLAGS["desc"], help=HELP["desc"])
 @click.option(
@@ -86,7 +92,13 @@ def rm(id: int) -> None:
     help=HELP["status"],
 )
 @click.option(FLAGS["due_at"], help=HELP["due_at"])
-def update(id, title, desc=None, status=None, due_at=None):
+def update(
+    id: int,
+    title: Optional[str] = None,
+    desc: Optional[str] = None,
+    status: Optional[str] = None,
+    due_at: Optional[str] = None,
+) -> None:
     """Update a task given its id"""
     updates = {
         k: v
@@ -122,7 +134,7 @@ def interactive_add() -> None:
     answers = run_interactive_steps(steps["add"])
     if answers is None:
         return
-    add.callback(answers["title"], answers["desc"], answers["due_at"] or None)
+    add.callback(**answers)
 
 
 def interactive_rm() -> None:
@@ -136,7 +148,7 @@ def interactive_update() -> None:
     base_answers = run_interactive_steps(steps["update"])
     if not base_answers or not base_answers["fields"]:
         return
-    task_id = base_answers["task_id"]
+    task_id = int(base_answers["task_id"])
     selected_fields = base_answers["fields"]
     # Filter prompts based on the chosen fields to update
     prompts = [task_prompts[name] for name in selected_fields]
