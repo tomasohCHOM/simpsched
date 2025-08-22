@@ -3,27 +3,16 @@ import questionary
 from typing import Optional
 from .constants import Action, Status
 from .db import DatabaseHandler
-from .utils import console
-from .view import display_tasks_table
-
-
-LOGO = """
-     _                          _              _ 
- ___(_)_ __ ___  _ __  ___  ___| |__   ___  __| |
-/ __| | '_ ` _ \\| '_ \\/ __|/ __| '_ \\ / _ \\/ _` |
-\\__ \\ | | | | | | |_) \\__ \\ (__| | | |  __/ (_| |
-|___/_|_| |_| |_| .__/|___/\\___|_| |_|\\___|\\__,_|
-                |_|
-"""
+from .view import display_logo, display_tasks_table, display_task_message
 
 
 @click.group(invoke_without_command=True)
 @click.pass_context
 def cli(ctx: click.Context) -> None:
     """Task manager CLI"""
-    console.print(LOGO, style="#9bcffa", highlight=False)
+    display_logo()
     if ctx.invoked_subcommand is None:
-        console.print(
+        display_task_message(
             "Welcome to interactive mode. Choose any of the options to continue:\n"
         )
         interactive_loop()
@@ -64,7 +53,7 @@ def add(title: str, desc: str, due: str) -> None:
     db = DatabaseHandler()
     db.add_task(title, desc, due)
     db.close()
-    click.echo(f"Task added: {title}")
+    display_task_message(f"Task added: {title}")
 
 
 @cli.command()
@@ -74,7 +63,7 @@ def rm(task_id: int) -> None:
     db = DatabaseHandler()
     db.remove_task(task_id)
     db.close()
-    click.echo(f"Task removed with id: {task_id}")
+    display_task_message(f"Task removed with id: {task_id}")
 
 
 @cli.command()
@@ -89,7 +78,7 @@ def update(task_id: int, status: Optional[str], due: Optional[str]):
     if status:
         db.update_status(task_id, status)
     db.close()
-    click.echo(f"Updated task with id {task_id}")
+    display_task_message(f"Updated task with id {task_id}")
 
 
 @cli.command()
