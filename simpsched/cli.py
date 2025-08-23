@@ -4,7 +4,8 @@ from typing import Optional
 from .constants import Action, Status, FLAGS, HELP
 from .db import DatabaseHandler
 from .steps import task_prompts, steps
-from .utils import run_interactive_steps
+from .utils import run_interactive_steps, run_validations, process_iso_date
+from .validations import ValidationFailedError
 from .view import display_logo, display_tasks_table, display_task_message
 
 
@@ -64,7 +65,12 @@ def add(
 ) -> None:
     """Add a new task"""
     db = DatabaseHandler()
-    db.add_task(title, desc, status, due_at)
+    try:
+        run_validations("add", {"title": title, "due_at": due_at})
+    except ValidationFailedError as e:
+        display_task_message(str(e))
+        return
+    db.add_task(title, desc, status, process_iso_date(due_at))
     db.close()
     display_task_message(f"Task added: {title}")
     list_tasks()
@@ -74,6 +80,11 @@ def add(
 @click.option(FLAGS["id"], help=HELP["id"], type=int, required=True)
 def rm(id: int) -> None:
     """Remove a task given its id"""
+    try:
+        run_validations("rm", {"task_id": id})
+    except ValidationFailedError as e:
+        display_task_message(str(e))
+        return
     db = DatabaseHandler()
     db.remove_task(id)
     db.close()
@@ -110,11 +121,14 @@ def update(
         }.items()
         if v is not None
     }
-
+    try:
+        run_validations("update", {"task_id": id, **updates})
+    except ValidationFailedError as e:
+        display_task_message(str(e))
+        return
     db = DatabaseHandler()
     db.update_task(id, **updates)
     db.close()
-
     display_task_message(f"Updated task with id: {id}")
     list_tasks()
 

@@ -1,12 +1,19 @@
 from .constants import Status
-from .validations import TitleNotEmptyValidator
+from .validations import (
+    InputNotEmptyValidator,
+    IsValidIsoValidator,
+    TaskIdExistsValidator,
+)
 
 task_prompts = {
     "title": {
         "name": "title",
         "qtype": "text",
         "prompt": "Enter task title:",
-        "kwargs": {"validate": TitleNotEmptyValidator},
+        "kwargs": {
+            "validate": InputNotEmptyValidator("title"),
+            "validate_while_typing": False,
+        },
     },
     "desc": {
         "name": "desc",
@@ -23,11 +30,19 @@ task_prompts = {
         "name": "due_at",
         "qtype": "text",
         "prompt": "Enter due date (YYYY-MM-DD HH:MM:SS - time is optional) (optional):",
+        "kwargs": {
+            "validate": IsValidIsoValidator("due_at"),
+            "validate_while_typing": False,
+        },
     },
     "task_id": {
         "name": "task_id",
         "qtype": "text",
         "prompt": "Enter the task id:",
+        "kwargs": {
+            "validate": TaskIdExistsValidator("task_id"),
+            "validate_while_typing": False,
+        },
     },
     "confirm": {
         "name": "confirm",
@@ -55,5 +70,17 @@ steps = {
     "update": [
         task_prompts["task_id"],
         task_prompts["choose"],
+    ],
+}
+
+validators = {
+    "add": [InputNotEmptyValidator("title"), IsValidIsoValidator("due_at")],
+    "rm": [
+        TaskIdExistsValidator("task_id"),
+    ],
+    "update": [
+        TaskIdExistsValidator("task_id"),
+        InputNotEmptyValidator("title"),
+        IsValidIsoValidator("due_at"),
     ],
 }

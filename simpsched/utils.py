@@ -1,5 +1,8 @@
 import questionary
+from typing import List
 from rich.console import Console
+from .steps import validators
+from .validations import BaseValidator
 
 console = Console()
 
@@ -33,3 +36,15 @@ def run_interactive_steps(steps):
 
     except KeyboardInterrupt:
         return None
+
+
+def run_validations(command: str, data: dict):
+    """Run all validations for the given command"""
+    cmd_validators: List[BaseValidator] = validators.get(command, [])
+    for validator in cmd_validators:
+        if validator.task_prompt in data and data[validator.task_prompt] is not None:
+            validator.check(data[validator.task_prompt])
+
+
+def process_iso_date(date: str) -> str:
+    return date if len(date.split()) > 1 else date + " 23:59:59"
