@@ -1,6 +1,8 @@
 import questionary
+from datetime import datetime
 from typing import List
 from rich.console import Console
+from .db import Task
 from .steps import validators
 from .validations import BaseValidator
 
@@ -48,3 +50,14 @@ def run_validations(command: str, data: dict):
 
 def process_iso_date(date: str) -> str:
     return date if len(date.split()) > 1 else date + " 23:59:59"
+
+
+def sort_tasks(tasks: List[Task]) -> List[Task]:
+    return sorted(
+        tasks,
+        key=lambda t: (
+            t.due_at is None,
+            t.due_at or datetime.max,
+            t.title.lower(),
+        ),
+    )

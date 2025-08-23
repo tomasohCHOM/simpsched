@@ -4,7 +4,7 @@ from typing import Optional
 from .constants import Action, Status, FLAGS, HELP
 from .db import DatabaseHandler
 from .steps import task_prompts, steps
-from .utils import run_interactive_steps, run_validations, process_iso_date
+from .utils import run_interactive_steps, run_validations, process_iso_date, sort_tasks
 from .validations import ValidationFailedError
 from .view import display_logo, display_tasks_table, display_task_message
 
@@ -176,7 +176,7 @@ def list_tasks() -> None:
     db = DatabaseHandler()
     tasks = db.list_tasks()
     db.close()
-    display_tasks_table(tasks)
+    display_tasks_table(sort_tasks(tasks))
 
 
 if __name__ == "__main__":
