@@ -38,3 +38,10 @@ HELP = {
     "due_at": "Due date (YYYY-MM-DD HH:MM:SS - time is optional)",
     "status": "Status of the task",
 }
+
+STATUS_PRIORITY = {
+    Status.IN_PROGRESS.value: 0,
+    Status.PENDING.value: 1,
+    Status.CANCELLED.value: 2,
+    Status.DONE.value: 3,
+}

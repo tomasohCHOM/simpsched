@@ -3,7 +3,7 @@ import questionary
 from typing import Optional
 from .constants import Action, Status, FLAGS, HELP
 from .db import DatabaseHandler
-from .steps import task_prompts, steps
+from .prompts import task_prompts, steps
 from .utils import run_interactive_steps, run_validations, process_iso_date, sort_tasks
 from .validations import ValidationFailedError
 from .view import display_logo, display_tasks_table, display_task_message
