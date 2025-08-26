@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "simpsched"
+version = "0.1.0"
+description = "A simple task scheduling CLI tool"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "click",
+    "questionary",
+    "prompt_toolkit",
+    "rich",
+]
+
+[project.scripts]
+simpsched = "simpsched.cli:cli"

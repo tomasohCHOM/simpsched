@@ -1,16 +1,16 @@
 import sqlite3
-from dataclasses import dataclass
+from pathlib import Path
 from typing import List, Optional
+from .models import Task
 
 
-@dataclass
-class Task:
-    id: int
-    title: str
-    desc: str
-    status: str
-    created_at: str
-    due_at: Optional[str]
+def get_db_path() -> Path:
+    cwd = Path.cwd() / "task.db"
+    if cwd.exists():
+        return cwd
+    home = Path.home() / ".local" / "share" / "simpsched" / "task.db"
+    home.parent.mkdir(parents=True, exist_ok=True)
+    return home
 
 
 class DatabaseHandler:
@@ -18,10 +18,10 @@ class DatabaseHandler:
     conn: sqlite3.Connection
     cur: sqlite3.Cursor
 
-    def __new__(cls, db_path: str = "tasks.db") -> "DatabaseHandler":
+    def __new__(cls) -> "DatabaseHandler":
         if cls._instance == None:
             cls._instance = super().__new__(cls)
-            cls._instance.conn = sqlite3.connect(db_path)
+            cls._instance.conn = sqlite3.connect(str(get_db_path()))
             cls._instance.cur = cls._instance.conn.cursor()
             cls._instance._setup()
         return cls._instance
@@ -46,9 +46,7 @@ class DatabaseHandler:
         self.cur.execute("SELECT id FROM tasks WHERE id = ?", (task_id,))
         return self.cur.fetchone()
 
-    def add_task(
-        self, title: str, desc: str, status: str, due_at: Optional[str]
-    ) -> None:
+    def add_task(self, title: str, desc: str, status: str, due_at: str) -> None:
         """Insert a new task. `due_at` should be ISO string (YYYY-MM-DD HH:MM:SS) or None."""
         self.cur.execute(
             "INSERT INTO tasks (title, desc, status, due_at) VALUES (?, ?, ?, ?)",

@@ -2,7 +2,7 @@ from rich.table import Table
 from rich import box
 from typing import List
 from .constants import STATUS_COLORS
-from .db import Task
+from .models import Task
 from .utils import console
 
 
@@ -49,9 +49,9 @@ def display_tasks_table(tasks: List[Task]) -> None:
     console.print()
 
 
-def display_logo():
+def display_logo() -> None:
     console.print(LOGO, style="#9bcffa", highlight=False)
 
 
-def display_task_message(message: str):
+def display_task_message(message: str) -> None:
     console.print(f"\n{message}\n", style="italic")

@@ -59,3 +59,16 @@ class IsValidIsoValidator(BaseValidator):
         raise ValidationFailedError(
             "Invalid ISO Date. Date must be in 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS' format"
         )
+
+
+validators = {
+    "add": [InputNotEmptyValidator("title"), IsValidIsoValidator("due_at")],
+    "rm": [
+        TaskIdExistsValidator("task_id"),
+    ],
+    "update": [
+        TaskIdExistsValidator("task_id"),
+        InputNotEmptyValidator("title"),
+        IsValidIsoValidator("due_at"),
+    ],
+}

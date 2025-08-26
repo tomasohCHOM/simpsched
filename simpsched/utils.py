@@ -3,9 +3,8 @@ from datetime import datetime
 from typing import List
 from rich.console import Console
 from .constants import STATUS_PRIORITY
-from .db import Task
-from .prompts import validators
-from .validations import BaseValidator
+from .models import Task
+from .validations import BaseValidator, validators
 
 console = Console()
 

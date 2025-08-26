@@ -2,7 +2,11 @@
 
 `simpsched` is a Python CLI tool to easily create and manage daily tasks.
 
-## Development / Setup
+## Prerequisites
+
+- This project uses the [`uv`](https://docs.astral.sh/uv/) package manager and build frontend.
+
+## Development Setup
 
 1. **Clone the repository:**
 
@@ -11,35 +15,18 @@
    cd simpsched
    ```
 
-2. **Create a virtual environment (recommended):**
+2. **Install dependencies using uv:**
 
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # On macOS/Linux
-   .\venv\Scripts\activate   # On Windows
+   uv sync
    ```
 
-3. **Install the required dependencies:**
-
+3. **Run:**
    ```bash
-   pip install -r requirements.txt
+   uv run simpsched
    ```
 
-## Installation
-
-To install `simpsched` locally:
-
-```bash
-pip install .
-```
-
-Alternatively, if you’re actively developing:
-
-```bash
-pip install -e .
-```
-
-> **Note:** The `-e` flag installs the project in **editable mode** so that any changes you make reflect immediately without reinstallation.
+*Note*: To build a distributable version of this app, use `uv build`. Install it locally with `uv tools install .`
 
 ## Usage
 

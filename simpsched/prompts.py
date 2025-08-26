@@ -72,15 +72,3 @@ steps = {
         task_prompts["choose"],
     ],
 }
-
-validators = {
-    "add": [InputNotEmptyValidator("title"), IsValidIsoValidator("due_at")],
-    "rm": [
-        TaskIdExistsValidator("task_id"),
-    ],
-    "update": [
-        TaskIdExistsValidator("task_id"),
-        InputNotEmptyValidator("title"),
-        IsValidIsoValidator("due_at"),
-    ],
-}
