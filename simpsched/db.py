@@ -33,10 +33,10 @@ class DatabaseHandler:
             CREATE TABLE IF NOT EXISTS tasks (
                 id          INTEGER PRIMARY KEY AUTOINCREMENT,
                 title       TEXT NOT NULL,
-                desc        TEXT,
+                desc        TEXT DEFAULT '',
                 status      TEXT DEFAULT 'pending',
                 created_at  TEXT DEFAULT CURRENT_TIMESTAMP,
-                due_at      TEXT,
+                due_at      TEXT DEFAULT '',
                 updated_at  TEXT DEFAULT CURRENT_TIMESTAMP
             )
         """

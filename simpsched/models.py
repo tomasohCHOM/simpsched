@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -10,4 +9,4 @@ class Task:
     status: str
     created_at: str
     updated_at: str
-    due_at: Optional[str]
+    due_at: str
