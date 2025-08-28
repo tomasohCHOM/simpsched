@@ -1,12 +1,11 @@
 import questionary
 from datetime import datetime
 from typing import List
-from rich.console import Console
-from .constants import STATUS_PRIORITY
+from .constants import Status, STATUS_PRIORITY
+from .db import DatabaseHandler
 from .models import Task
 from .validations import BaseValidator, validators
-
-console = Console()
+from .view import display_task_message
 
 
 def run_interactive_steps(steps):
@@ -46,6 +45,27 @@ def run_validations(command: str, data: dict):
     for validator in cmd_validators:
         if validator.task_prompt in data and data[validator.task_prompt] is not None:
             validator.check(data[validator.task_prompt])
+
+
+def remove_inactive_tasks():
+    db = DatabaseHandler()
+    tasks = db.list_tasks()
+    cutoff = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    removable_tasks = [
+        task
+        for task in tasks
+        if task.status in [Status.CANCELLED.value, Status.DONE.value]
+        and datetime.strptime(task.updated_at, "%Y-%m-%d %H:%M:%S") < cutoff
+    ]
+    if removable_tasks:
+        display_task_message(
+            f"Removing the following tasks: {[task.title for task in removable_tasks]}"
+        )
+
+    for task in removable_tasks:
+        db.remove_task(task.id)
+    db.close()
+    return removable_tasks
 
 
 def process_iso_date(date: str) -> str:

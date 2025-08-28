@@ -9,4 +9,5 @@ class Task:
     desc: str
     status: str
     created_at: str
+    updated_at: str
     due_at: Optional[str]

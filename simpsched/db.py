@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 from .models import Task
@@ -32,10 +33,11 @@ class DatabaseHandler:
             CREATE TABLE IF NOT EXISTS tasks (
                 id          INTEGER PRIMARY KEY AUTOINCREMENT,
                 title       TEXT NOT NULL,
-                desc TEXT,
+                desc        TEXT,
                 status      TEXT DEFAULT 'pending',
                 created_at  TEXT DEFAULT CURRENT_TIMESTAMP,
-                due_at      TEXT
+                due_at      TEXT,
+                updated_at  TEXT DEFAULT CURRENT_TIMESTAMP
             )
         """
         )
@@ -48,9 +50,10 @@ class DatabaseHandler:
 
     def add_task(self, title: str, desc: str, status: str, due_at: str) -> None:
         """Insert a new task. `due_at` should be ISO string (YYYY-MM-DD HH:MM:SS) or None."""
+        curr_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.cur.execute(
-            "INSERT INTO tasks (title, desc, status, due_at) VALUES (?, ?, ?, ?)",
-            (title, desc, status, due_at),
+            "INSERT INTO tasks (title, desc, status, created_at, due_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+            (title, desc, status, curr_time, due_at, curr_time),
         )
         self.conn.commit()
 
@@ -71,7 +74,7 @@ class DatabaseHandler:
     def list_tasks(self) -> List[Task]:
         """Return list of Task objects from the db."""
         self.cur.execute(
-            "SELECT id, title, desc, status, created_at, due_at FROM tasks"
+            "SELECT id, title, desc, status, created_at, updated_at, due_at FROM tasks"
         )
         rows = self.cur.fetchall()
         return [Task(*row) for row in rows]

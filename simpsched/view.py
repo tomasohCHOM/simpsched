@@ -1,9 +1,9 @@
+from rich.console import Console
 from rich.table import Table
 from rich import box
 from typing import List
 from .constants import STATUS_COLORS
 from .models import Task
-from .utils import console
 
 
 LOGO = """
@@ -14,6 +14,8 @@ LOGO = """
 |___/_|_| |_| |_| .__/|___/\\___|_| |_|\\___|\\__,_|
                 |_|
 """
+
+console = Console()
 
 
 def display_tasks_table(tasks: List[Task]) -> None:
