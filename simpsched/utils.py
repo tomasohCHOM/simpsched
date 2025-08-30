@@ -1,11 +1,10 @@
 import questionary
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 from .constants import Status, STATUS_PRIORITY
 from .db import DatabaseHandler
 from .models import Task
 from .validations import BaseValidator, validators
-from .view import display_task_message
 
 
 def run_interactive_steps(steps):
@@ -47,7 +46,7 @@ def run_validations(command: str, data: dict):
             validator.check(data[validator.task_prompt])
 
 
-def remove_inactive_tasks():
+def remove_inactive_tasks() -> List[str]:
     db = DatabaseHandler()
     tasks = db.list_tasks()
     cutoff = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -57,19 +56,26 @@ def remove_inactive_tasks():
         if task.status in [Status.CANCELLED.value, Status.DONE.value]
         and datetime.strptime(task.updated_at, "%Y-%m-%d %H:%M:%S") < cutoff
     ]
-    if removable_tasks:
-        display_task_message(
-            f"Removing the following tasks: {[task.title for task in removable_tasks]}"
-        )
-
     for task in removable_tasks:
         db.remove_task(task.id)
     db.close()
-    return removable_tasks
+    return [task.title for task in removable_tasks]
 
 
 def process_iso_date(date: str) -> str:
     return date if not date or len(date.split()) > 1 else date + " 23:59:59"
+
+
+def get_due_status(due_at: str) -> List[str]:
+    """Takes `due_at` as argument and determines its due status (and its corresponding color)"""
+    if not due_at:
+        return "", ""
+    diff = datetime.strptime(due_at, "%Y-%m-%d %H:%M:%S") - datetime.now()
+    if diff.total_seconds() < 0:
+        return "overdue", "red"
+    elif diff <= timedelta(hours=6):
+        return "due soon", "yellow"
+    return "on time", "white"
 
 
 def sort_tasks(tasks: List[Task]) -> List[Task]:

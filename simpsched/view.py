@@ -4,6 +4,7 @@ from rich import box
 from typing import List
 from .constants import STATUS_COLORS
 from .models import Task
+from .utils import get_due_status
 
 
 LOGO = """
@@ -38,12 +39,17 @@ def display_tasks_table(tasks: List[Task]) -> None:
 
     for task in tasks:
         status_color = STATUS_COLORS.get(task.status, "white")
+        due_status, due_status_color = get_due_status(task.due_at)
         table.add_row(
             str(task.id),
             task.title,
             task.desc or "-",
             f"[{status_color}]{task.status}[/{status_color}]",
-            task.due_at or "—",
+            (
+                f"{task.due_at} [{due_status_color}]({due_status})[/{due_status_color}]"
+                if task.due_at
+                else "—"
+            ),
         )
 
     console.print()

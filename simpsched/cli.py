@@ -21,7 +21,9 @@ from .view import display_logo, display_tasks_table, display_task_message
 def cli(ctx: click.Context) -> None:
     """Task manager CLI"""
     display_logo()
-    remove_inactive_tasks()
+    removed_tasks = remove_inactive_tasks()
+    if removed_tasks:
+        display_task_message(f"Removed the following inactive tasks: {removed_tasks}")
     if ctx.invoked_subcommand is None:
         display_task_message(
             "Welcome to interactive mode. Choose any of the options to continue:\n"
@@ -119,7 +121,7 @@ def update(
             "title": title,
             "desc": desc,
             "status": status,
-            "due_at": due_at,
+            "due_at": process_iso_date(due_at),
             "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }.items()
         if v is not None
