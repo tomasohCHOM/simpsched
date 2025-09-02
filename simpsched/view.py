@@ -2,7 +2,7 @@ from rich.console import Console
 from rich.table import Table
 from rich import box
 from typing import List
-from .constants import STATUS_COLORS
+from .constants import STATUS_COLORS, Status
 from .models import Task
 from .utils import get_due_status
 
@@ -39,17 +39,22 @@ def display_tasks_table(tasks: List[Task]) -> None:
 
     for task in tasks:
         status_color = STATUS_COLORS.get(task.status, "white")
-        due_status, due_status_color = get_due_status(task.due_at)
+        due_display = "-"
+        if task.status in [Status.CANCELLED.value, Status.DONE.value]:
+            due_display = task.due_at if task.due_at else "-"
+        elif task.due_at:
+            due_status, due_status_color = get_due_status(task.due_at)
+            due_display = (
+                f"{task.due_at} [{due_status_color}]({due_status})[/{due_status_color}]"
+                if due_status
+                else task.due_at
+            )
         table.add_row(
             str(task.id),
             task.title,
             task.desc or "-",
             f"[{status_color}]{task.status}[/{status_color}]",
-            (
-                f"{task.due_at} [{due_status_color}]({due_status})[/{due_status_color}]"
-                if task.due_at
-                else "—"
-            ),
+            due_display,
         )
 
     console.print()

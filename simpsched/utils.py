@@ -66,7 +66,7 @@ def process_iso_date(date: str) -> str:
     return date if not date or len(date.split()) > 1 else date + " 23:59:59"
 
 
-def get_due_status(due_at: str) -> List[str]:
+def get_due_status(due_at: str) -> tuple[str, str]:
     """Takes `due_at` as argument and determines its due status (and its corresponding color)"""
     if not due_at:
         return "", ""
@@ -82,9 +82,9 @@ def sort_tasks(tasks: List[Task]) -> List[Task]:
     return sorted(
         tasks,
         key=lambda t: (
+            STATUS_PRIORITY.get(t.status, 99),
             t.due_at is None or t.due_at == "",
             t.due_at or datetime.max,
-            STATUS_PRIORITY.get(t.status, 99),
             t.title.lower(),
         ),
     )

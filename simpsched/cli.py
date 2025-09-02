@@ -114,14 +114,14 @@ def update(
     status: Optional[str] = None,
     due_at: Optional[str] = None,
 ) -> None:
-    """Update a task given its id"""
+    """Update a task given its id. Fields are optional if only updating certain fields."""
     updates = {
         k: v
         for k, v in {
             "title": title,
             "desc": desc,
             "status": status,
-            "due_at": process_iso_date(due_at),
+            "due_at": process_iso_date(due_at) if due_at is not None else None,
             "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }.items()
         if v is not None
