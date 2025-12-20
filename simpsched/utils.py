@@ -46,6 +46,16 @@ def run_validations(command: str, data: dict):
             validator.check(data[validator.task_prompt])
 
 
+def get_task_choices():
+    db = DatabaseHandler()
+    tasks = db.list_tasks()
+    db.close()
+    return [
+        questionary.Choice(title=f"{task.title} (id: {task.id})", value=task.id)
+        for task in tasks
+    ]
+
+
 def remove_inactive_tasks() -> List[str]:
     db = DatabaseHandler()
     tasks = db.list_tasks()

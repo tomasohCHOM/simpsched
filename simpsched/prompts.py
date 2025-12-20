@@ -1,8 +1,8 @@
+from simpsched.utils import get_task_choices
 from .constants import Status
 from .validations import (
     InputNotEmptyValidator,
     IsValidIsoValidator,
-    TaskIdExistsValidator,
 )
 
 task_prompts = {
@@ -35,14 +35,11 @@ task_prompts = {
             "validate_while_typing": False,
         },
     },
-    "task_id": {
+    "choose_task": {
         "name": "task_id",
-        "qtype": "text",
-        "prompt": "Enter the task id:",
-        "kwargs": {
-            "validate": TaskIdExistsValidator("task_id"),
-            "validate_while_typing": False,
-        },
+        "qtype": "select",
+        "prompt": "Choose from the following list of tasks:",
+        "kwargs": {"choices": get_task_choices()},
     },
     "confirm": {
         "name": "confirm",
@@ -66,9 +63,9 @@ steps = {
         task_prompts["status"],
         task_prompts["due_at"],
     ],
-    "rm": [task_prompts["task_id"], task_prompts["confirm"]],
+    "rm": [task_prompts["choose_task"], task_prompts["confirm"]],
     "update": [
-        task_prompts["task_id"],
+        task_prompts["choose_task"],
         task_prompts["choose"],
     ],
 }
