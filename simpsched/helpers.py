@@ -22,7 +22,7 @@ def run_interactive_steps(steps):
         for step in steps:
             qtype = step["qtype"]
             message = step["prompt"]
-            kwargs = step.get("kwargs", {})
+            kwargs = transform_kwargs(step.get("kwargs", {}))
 
             prompt_func = getattr(questionary, qtype)
             answer = prompt_func(message, **kwargs).ask()
@@ -36,6 +36,14 @@ def run_interactive_steps(steps):
 
     except KeyboardInterrupt:
         return None
+
+
+def transform_kwargs(kwargs):
+    """Only change: if given a callable, return its value in the kwargs"""
+    transformed = {}
+    for k, v in kwargs.items():
+        transformed[k] = v() if callable(v) else v
+    return transformed
 
 
 def run_validations(command: str, data: dict):

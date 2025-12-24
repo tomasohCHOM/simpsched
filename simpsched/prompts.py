@@ -1,4 +1,4 @@
-from simpsched.utils import get_task_choices
+from .helpers import get_task_choices
 from .constants import Status
 from .validations import (
     InputNotEmptyValidator,
@@ -39,7 +39,7 @@ task_prompts = {
         "name": "task_id",
         "qtype": "select",
         "prompt": "Choose from the following list of tasks:",
-        "kwargs": {"choices": get_task_choices()},
+        "kwargs": {"choices": get_task_choices},
     },
     "confirm": {
         "name": "confirm",

@@ -4,7 +4,7 @@ from rich import box
 from typing import List
 from .constants import STATUS_COLORS, Status
 from .models import Task
-from .utils import get_due_status
+from .helpers import get_due_status
 
 
 LOGO = """
